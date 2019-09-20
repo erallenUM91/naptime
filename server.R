@@ -1,17 +1,12 @@
-#
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+
 
 library(shiny)
+library(tidyverse)
+library(lubridate)
 
-# Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
+# load the sample data
 dfsample <- structure(list(napt = structure(c(1349551800, 1349569800, 1349573100, 
 1349588640, 1349589660, 1349601360, 1349604720, 1349607600, 1349613840, 
 1349624580, 1349631180, 1349633040, 1349636820, 1349637240, 1349637600, 
@@ -201,7 +196,9 @@ dfsample <- structure(list(napt = structure(c(1349551800, 1349569800, 1349573100
 16L, 325L, 15L, 324L, 14L, 323L, 13L, 322L, 12L, 321L, 11L, 320L, 
 10L, 319L, 9L, 318L, 8L, 317L, 7L, 316L, 6L, 315L, 5L, 314L, 
 4L, 313L, 3L, 312L, 2L, 311L, 1L, 310L), class = "data.frame")
-    
+
+
+# load/upload the data
 dfupload <- reactive({
     
                 if (is.null(input$file1))
@@ -211,6 +208,7 @@ dfupload <- reactive({
                 data
         })
 
+# set data filter values
 dffilter <- eventReactive(input$dateRange, {
     
                 if (is.null(input$dateRange)) 
@@ -219,6 +217,7 @@ dffilter <- eventReactive(input$dateRange, {
                 data
         })
 
+# collect date range
 output$interaction_dateRange <- renderUI({
     
     dfnap2 <- dfupload()
@@ -230,30 +229,16 @@ output$interaction_dateRange <- renderUI({
     
 })
 
+# prepare the data/render the plot
+
 output$distPlot <- renderPlot({
 
-# dfnap <- ifelse(is.null(dfinput),dfsample,dfinput)
-
-    # filtering the dates
-    
-#    dfnap <- dfsample
     dfnap <- dfupload()    
     
-    oldfile <- input$file1
-    
-   dfnap  <- subset(dfnap, dfnap$napt >= dffilter()[1] & dfnap$napt <= dffilter()[2]) # this works with error
+    dfnap  <- subset(dfnap, dfnap$napt >= dffilter()[1] & dfnap$napt <= dffilter()[2]) 
    
-#   dfnap <- dfnap %>% filter(napt >= input$dateRange[1] & napt <= input$dateRange[2])
-   
-#   dfnap <- subset(dfnap, dfnap$napt >= input$dateRange[1] & dfnap$napt <= input$dateRange[2]) # this works with error
-#   dfnap <- subset(dfnap, dfnap$napt >= (min(dfnap$napt)+480*60*60)  & dfnap$napt <= (max(dfnap$napt)-240*60*60))
-#    dfnap <- subset(dfnap, 
-#        dfnap$napt >= input$interaction_dateRange[1] & dfnap$napt <= input$input$interaction_dateRange[2]) #doesn't work
-
-    
     # rounding the time
     
-    library(lubridate)
     dfnap$rndnapt <- round_date(dfnap$napt,"15 minutes")
     
     # add missing time segments
@@ -261,17 +246,15 @@ output$distPlot <- renderPlot({
     dfseg <- data.frame(rndnapt = seq(min(dfnap$rndnapt),max(dfnap$rndnapt), by = '15 mins'))
     dfnapfull <- merge(dfnap,dfseg,by = 'rndnapt',all.y = T)
     
-    library(tidyverse)
-    
     dfnapfill <- tidyr::fill(dfnapfull,event)
     
-    ## need a group_by to handle fussy periods - take the average of event
+    # summarize multiple events in a segment (fusy baby periods)
     
     dfnapfill <- dfnapfill %>% group_by(rndnapt) %>% summarise(event = mean(event))
     dfnapfill$width <- 0
     dfnapfill$hour <- (as.numeric(dfnapfill$rndnapt) %% (24*60*60) / 3600)
     
-    # need a predictive algorythem
+    # use an algorythm to "predict" the next day
     
     napmod <- lm(event ~ as.factor(hour),data = dfnapfill)
     
