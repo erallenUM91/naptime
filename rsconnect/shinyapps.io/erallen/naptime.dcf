@@ -5,8 +5,8 @@ account: erallen
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1218437
-bundleId: 2430464
+bundleId: 2433530
 url: https://erallen.shinyapps.io/naptime/
-when: 1569009584.24577
+when: 1569121215.1714
 asMultiple: FALSE
 asStatic: FALSE

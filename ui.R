@@ -37,10 +37,10 @@ shinyUI(
         tags$br(),
         tags$br(),
         tags$sup(1),
-        "Sample data is shown.  You may upload your own data in a comma delimited file with a header row of [\"napt\",\"event\"] and additional rows of sleep data containing a timestamp and event code of 0 for 'went to sleep' and 1 for 'woke up'.  Event rows must be in the following format [YYYY-MM-DD HH:MM:SS,#] for example [2019-01-15 03:37:40,0].  (note: the square brackets [ ] are not part of the actual data.)",
+        "Sample data is shown upon openning the application.  You may upload your own data in a comma delimited file with a header row of [\"napt\",\"event\"] and additional rows of sleep data containing a timestamp and event code of 0 for 'went to sleep' and 1 for 'woke up'.  Event rows must be in the following format [YYYY-MM-DD HH:MM:SS,#] for example [2019-01-15 03:37:40,0].  (note: the square brackets [ ] are not part of the actual data.)",
         tags$br(),
         tags$br(),
-        "Please see the application ",tags$a(href="www.google.com","Pitch Deck")," for additional information and references.")
+        "Please see the application ",tags$a(href="http://rpubs.com/erallen/naptime","Pitch Deck")," for additional information and references.")
                                   )
         ),
      tags$style(type="text/css",
